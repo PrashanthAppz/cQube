@@ -49,14 +49,16 @@ echo "session_timeout_in_seconds: $timeout_value" >> roles/keycloak/vars/main.ym
 
 check_state()
 {
-state_found=0
-while read line; do
-  if [[ $line == $2 ]] ; then
-   state_found=1
-  fi
-done < validation_scripts/state_codes
-if [[ $state_found == 0 ]] ; then
-  echo "Error - Invalid State code. Please refer the state_list file and enter the correct value."; fail=1
+sc=$(cat $base_dir/cqube/.cqube_config | grep CQUBE_STATE_CODE )
+installed_state_code=$(cut -d "=" -f2 <<< "$sc")
+if [[ ! "$2" == "$installed_state_code" ]]; then
+    echo "Error - State code should be same as previous installation. Please refer the state_list file and enter the correct value."; fail=1
+fi
+}
+
+check_static_datasource(){
+if ! [[ $2 == "udise" || $2 == "state" ]]; then
+    echo "Error - Please enter either udise or state for $1"; fail=1
 fi
 }
 
@@ -284,8 +286,8 @@ echo -e "\e[0;33m${bold}Validating the config file...${normal}"
 
 
 # An array of mandatory values
-declare -a arr=("diksha_columns" "state_code" "system_user_name" "base_dir" "db_user" "db_name" "db_password" "s3_access_key" "s3_secret_key" \
-		"s3_input_bucket" "s3_output_bucket" "s3_emission_bucket" \
+declare -a arr=("diksha_columns" "state_code" "static_datasource" "system_user_name" "base_dir" "db_user" "db_name" "db_password" "s3_access_key" \
+		"s3_secret_key" "s3_input_bucket" "s3_output_bucket" "s3_emission_bucket" \
 		"aws_default_region" "local_ipv4_address" "api_endpoint" "keycloak_adm_passwd" "keycloak_adm_user" "keycloak_config_otp" "session_timeout")
 
 # Create and empty array which will store the key and value pair from config file
@@ -313,7 +315,7 @@ db_password=$(awk ''/^db_password:' /{ if ($2 !~ /#.*/) {print $2}}' upgradation
 
 check_mem
 # Check the version before starting validation
-version_upgradable_from=1.6.1
+version_upgradable_from=1.8
 check_version
 
 # Iterate the array and retrieve values for mandatory fields from config file
@@ -339,6 +341,13 @@ case $key in
           echo "Error - in $key. Unable to get the value. Please check."; fail=1
        else
           check_state $key $value
+       fi
+       ;;
+   static_datasource)
+       if [[ $value == "" ]]; then
+          echo "Error - in $key. Unable to get the value. Please check."; fail=1
+       else
+          check_static_datasource $key $value
        fi
        ;;
    system_user_name)

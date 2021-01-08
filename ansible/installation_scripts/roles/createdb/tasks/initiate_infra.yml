@@ -17,6 +17,7 @@
     - config.sql
     - infrastructure_master.csv
     - udise_config.csv
+    - truncate_tables.sql
   tags: [ install, update ]
 
 - name: Run queries from SQL script
@@ -33,7 +34,7 @@
   tags: [ install, update ]
 
 - name: Copying table structure from csv file
-  shell: psql "host=localhost dbname={{ db_name }} user={{ db_user }} password={{ db_password }}" -c "copy infrastructure_staging_init(infrastructure_name,infrastructure_category,status) from '/tmp/postgres/infrastructure_master.csv' delimiter ',' csv header;"
+  shell: psql "host=localhost dbname={{ db_name }} user={{ db_user }} password={{ db_password }}" -c "copy infrastructure_master(infrastructure_name,infrastructure_category,score,status) from '/tmp/postgres/infrastructure_master.csv' delimiter ',' csv header;"
   when: output_infra.stdout_lines[2].strip() == "0"
   tags: [ install, update ]
 
@@ -65,7 +66,17 @@
     path_to_script: /tmp/postgres/config.sql
   tags: [ install, update ]
 
-- name: Stopping postgresql
+- name: Truncating previous tables
+  shell: psql "host=localhost dbname={{ db_name }} user={{ db_user }} password={{ db_password }}" -a -q -f "/tmp/postgres/truncate_tables.sql"
+  when: datasource_status == "unmatched"
+  tags: [ install, update ]
+
+- name: Clearing s3 output bucket data
+  shell: aws s3 rm s3://{{ s3_output_bucket }}  --recursive
+  when: datasource_status == "unmatched"
+  tags: [ install, update ]
+
+- name: Stopping postgresql 
   service: 
     name: postgresql
     state: stopped

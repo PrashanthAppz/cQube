@@ -66,6 +66,13 @@ export class HeatChartComponent implements OnInit {
   myData;
   state: string;
 
+  //For pagination.....
+  items = [];
+  pageOfItems: Array<any>;
+  pageSize = 40;
+  currentPage = 1;
+
+
   constructor(
     public http: HttpClient,
     public service: PatReportService,
@@ -87,13 +94,16 @@ export class HeatChartComponent implements OnInit {
           this.allViews = this.metaData[i].data['viewBy'];
           break;
         }
-      };
+      }
       this.month = this.months[this.months.length - 1];
       this.examDates = this.metaData[i].data['months'][`${this.month}`]['examDate'];
       this.grades = [{ grade: "all" }, ...this.grades.filter(item => item !== { grade: "all" })];
       this.subjects = [{ subject: "all" }, ...this.subjects.filter(item => item !== { subject: "all" })];
       this.examDates = [{ exam_date: "all" }, ...this.examDates.filter(item => item !== { exam_date: "all" })];
       this.commonFunc();
+    },err=>{
+      this.metaData = [];
+      this.commonService.loaderAndErr(this.metaData);
     })
   }
 
@@ -123,11 +133,30 @@ export class HeatChartComponent implements OnInit {
     document.getElementById('backBtn').style.display = 'none';
   }
 
+  onChangePage() {
+    let yLabel = this.yLabel.slice((this.currentPage - 1) * this.pageSize, ((this.currentPage - 1) * this.pageSize + this.pageSize));
+    let data = this.items.slice(this.pageSize * this.xLabel.length * (this.currentPage - 1), this.pageSize * this.xLabel.length * this.currentPage);
+    let tooltipData = this.toolTipData.slice(this.pageSize * this.xLabel.length * (this.currentPage - 1), this.pageSize * this.xLabel.length * this.currentPage);
+
+    data = data.map(record => {
+      record.y %= this.pageSize;
+      return record;
+    });
+
+    tooltipData = tooltipData.map(record => {
+      record.y %= this.pageSize;
+      return record;
+    });
+
+    this.chartFun(this.xlab.length > 0 ? this.xlab : this.xLabel, this.xLabelId, this.ylab.length > 0 ? this.ylab : yLabel, this.zLabel, data, this.a['viewBy'], this.level, this.xLabel1, this.yLabel1, tooltipData, this.grade);
+  }
+
   resetToInitPage() {
     this.fileName = "District_wise_report";
     this.resetOnAllGrades();
     this.year = this.years[this.years.length - 1];
     this.commonFunc();
+    this.currentPage = 1;
 
     document.getElementById('home').style.display = 'none';
   }
@@ -155,7 +184,7 @@ export class HeatChartComponent implements OnInit {
     }, err => {
       this.reportData = [];
       this.commonService.loaderAndErr(this.reportData);
-      if (this.chart) {
+      if (this.chart.axes) {
         this.chart.destroy();
       }
     })
@@ -207,7 +236,7 @@ export class HeatChartComponent implements OnInit {
         max: 30,
         scrollbar: {
           enabled: scrollBarX
-        },
+        }
       }, {
         lineColor: '#FFFFFF',
         linkedTo: 0,
@@ -233,13 +262,20 @@ export class HeatChartComponent implements OnInit {
             textOverflow: "ellipsis",
             fontFamily: 'Arial'
           },
-          align: "right"
+          align: "right",
+          formatter: function (this) {
+            if (typeof this.value === 'string') {
+              return `<p>${this.value}</p>`;
+            }
+
+            return '';
+          }
         },
         gridLineColor: 'transparent',
         title: null,
         reversed: true,
         min: 0,
-        max: 12,
+        max: 11,
         scrollbar: {
           enabled: scrollBarY
         }
@@ -368,22 +404,22 @@ export class HeatChartComponent implements OnInit {
     }
   }
 
-  resetOnAllGrades(){
+  resetOnAllGrades() {
     this.level = 'district';
-        this.skul = true;
-        this.dist = false;
-        this.blok = false;
-        this.clust = false;
-        this.grade = 'all';
-        this.examDate = 'all';
-        this.subject = 'all';
-        this.viewBy = 'indicator';
-        this.gradeSelected = false;
-        this.district = undefined;
-        this.block = undefined;
-        this.cluster = undefined;
-        this.blockHidden = true;
-        this.clusterHidden = true;
+    this.skul = true;
+    this.dist = false;
+    this.blok = false;
+    this.clust = false;
+    this.grade = 'all';
+    this.examDate = 'all';
+    this.subject = 'all';
+    this.viewBy = 'indicator';
+    this.gradeSelected = false;
+    this.district = undefined;
+    this.block = undefined;
+    this.cluster = undefined;
+    this.blockHidden = true;
+    this.clusterHidden = true;
   }
 
   selectedSubject() {
@@ -414,6 +450,7 @@ export class HeatChartComponent implements OnInit {
   }
 
   selectedDistrict(districtId) {
+    this.currentPage = 1;
     this.fileName = "Block_wise_report";
     this.level = 'block';
     this.block = undefined;
@@ -449,7 +486,7 @@ export class HeatChartComponent implements OnInit {
     }, err => {
       this.reportData = [];
       this.commonService.loaderAndErr(this.reportData);
-      if (this.chart) {
+      if (this.chart.axes) {
         this.chart.destroy();
       }
     })
@@ -457,6 +494,7 @@ export class HeatChartComponent implements OnInit {
   }
 
   selectedBlock(blockId) {
+    this.currentPage = 1;
     this.fileName = "Cluster_wise_report";
     this.level = 'cluster';
     this.cluster = undefined;
@@ -496,13 +534,14 @@ export class HeatChartComponent implements OnInit {
     }, err => {
       this.reportData = [];
       this.commonService.loaderAndErr(this.reportData);
-      if (this.chart) {
+      if (this.chart.axes) {
         this.chart.destroy();
       }
     })
   }
 
   selectedCluster(clusterId) {
+    this.currentPage = 1;
     this.fileName = "School_wise_report";
     this.level = 'school';
     document.getElementById('home').style.display = 'block';
@@ -541,24 +580,25 @@ export class HeatChartComponent implements OnInit {
     }, err => {
       this.reportData = [];
       this.commonService.loaderAndErr(this.reportData);
-      if (this.chart) {
+      if (this.chart.axes) {
         this.chart.destroy();
       }
     })
   }
 
+  xlab = []; ylab = []; a = {}; yLabel = []; xLabel = []; xLabelId = []; zLabel = []; xLabel1 = []; yLabel1 = []; toolTipData: any;
   genericFunction(response) {
     this.reportData = [];
-    var xlab = [];
-    var ylab = [];
-    let a = {
+    this.xlab = [];
+    this.ylab = [];
+    this.a = {
       viewBy: this.viewBy == 'indicator' ? 'indicator' : this.viewBy
     }
-    let yLabel = response['result']['yLabel']
-    let xLabel = response['result']['xLabel']
-    let xLabelId = response['result']['xLabelId']
-    let data = response['result']['data']
-    let zLabel = response['result']['zLabel']
+    this.yLabel = response['result']['yLabel']
+    this.xLabel = response['result']['xLabel']
+    this.xLabelId = response['result']['xLabelId']
+    this.data = response['result']['data']
+    this.zLabel = response['result']['zLabel']
     this.reportData = response['downloadData']
     if (response['districtDetails']) {
       let districts = response['districtDetails'];
@@ -572,24 +612,28 @@ export class HeatChartComponent implements OnInit {
       let clusters = response['clusterDetails'];
       this.clusterNames = clusters.sort((a, b) => (a.cluster_name > b.cluster_name) ? 1 : ((b.cluster_name > a.cluster_name) ? -1 : 0));
     }
-    if (xLabel.length <= 30) {
+    if (this.xLabel.length <= 30) {
       for (let i = 0; i <= 30; i++) {
-        xlab.push(xLabel[i] ? xLabel[i] : ' ')
+        this.xlab.push(this.xLabel[i] ? this.xLabel[i] : ' ')
       }
     }
 
-    if (yLabel.length <= 12) {
+    if (this.yLabel.length <= 12) {
       for (let i = 0; i <= 12; i++) {
-        ylab.push(yLabel[i] ? yLabel[i] : ' ')
+        this.ylab.push(this.yLabel[i] ? this.yLabel[i] : ' ')
       }
     }
-    let xLabel1 = xLabel
-    let yLabel1 = yLabel
-    this.chartFun(xlab.length > 0 ? xlab : xLabel, xLabelId, ylab.length > 0 ? ylab : yLabel, zLabel, data, a.viewBy, this.level, xLabel1, yLabel1, response['result']['tooltipData'], this.grade);
+    this.xLabel1 = this.xLabel
+    this.yLabel1 = this.yLabel
+
+    this.items = this.data.map((x, i) => x);
+    this.toolTipData = response['result']['tooltipData'];
+    this.onChangePage();
   }
 
   //level wise filter
   levelWiseFilter() {
+    this.currentPage = 1;
     document.getElementById('home').style.display = 'block';
     if (this.level == 'district') {
       this.commonFunc()

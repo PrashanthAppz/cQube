@@ -50,6 +50,7 @@ const semDistrictWise = require('../api/controller/semRoutes/districtWise');
 const semBlockWise = require('../api/controller/semRoutes/blockWise');
 const semClusterWise = require('../api/controller/semRoutes/clusterWise');
 const semSchoolWise = require('../api/controller/semRoutes/schoolWise');
+const semMeta = require('./controller/semRoutes/metaData');
 
 //UDISE report
 
@@ -88,6 +89,7 @@ const tpdDistWise = require('./controller/diksha/tpd-heatChart/distWise');
 const tpdBlockWise = require('./controller/diksha/tpd-heatChart/blockWise');
 const tpdClusterWise = require('./controller/diksha/tpd-heatChart/clusterWise');
 const tpdSchoolWise = require('./controller/diksha/tpd-heatChart/schoolWise');
+const courseFilter = require('./controller/diksha/tpd-heatChart/courseFilter');
 
 //diksha TPD enrollment/completion
 const distLevel = require('./controller/diksha/tpd-enroll-completion/distWise');
@@ -102,6 +104,7 @@ router.use('/sem', semDistrictWise);
 router.use('/sem', semBlockWise);
 router.use('/sem', semClusterWise);
 router.use('/sem', semSchoolWise);
+router.use('/sem', semMeta);
 
 // crc routes
 router.use('/crc', crcDistrictWise);
@@ -150,6 +153,21 @@ router.use('/showBlockTelemetry', showBlockTelemetry);
 router.use('/showClusterTelemetry', showClusterTelemetry);
 router.use('/showSchoolTelemetry', showSchoolTelemetry);
 
+// healthCard
+const healthCardMeta = require('./controller/healthCard/metadata');
+const stateData = require('./controller/healthCard/stateData');
+const districtHealthCard = require('./controller/healthCard/districtWise');
+const blockHealthCard = require('./controller/healthCard/blockWise');
+const clusterHealthCard = require('./controller/healthCard/clusterWise');
+const schoolHealthCard = require('./controller/healthCard/schoolWise');
+
+router.use('/healthCard', healthCardMeta);
+router.use('/healthCard', stateData);
+router.use('/healthCard', districtHealthCard);
+router.use('/healthCard', blockHealthCard);
+router.use('/healthCard', clusterHealthCard);
+router.use('/healthCard', schoolHealthCard);
+
 //Udise......
 router.use('/udise', UDISE_dist_wise);
 router.use('/udise', UDISE_block_wise);
@@ -186,8 +204,11 @@ router.use('/diksha/tpd', tpdDistWise);
 router.use('/diksha/tpd', tpdBlockWise);
 router.use('/diksha/tpd', tpdClusterWise);
 router.use('/diksha/tpd', tpdSchoolWise);
+router.use('/diksha/course-filter', courseFilter);
+
 
 const dataSource = require('./controller/dataSource');
+const { route } = require('../api/controller/Infra/report_map/infraDistWise');
 router.use('/dataSource', dataSource);
 
 //diksha TPD enrollment/completion

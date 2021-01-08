@@ -78,12 +78,14 @@ export class InfraMapVisualisationComponent implements OnInit {
   public lat: any;
   public lng: any;
 
+
   constructor(
     public http: HttpClient,
     public service: SchoolInfraService,
     public commonService: AppServiceComponent,
     public router: Router,
     private changeDetection: ChangeDetectorRef,
+    private readonly _router: Router
   ) {
   }
 
@@ -96,8 +98,86 @@ export class InfraMapVisualisationComponent implements OnInit {
     globalMap.setMaxBounds([[this.lat - 4.5, this.lng - 6], [this.lat + 3.5, this.lng + 6]]);
     document.getElementById('homeBtn').style.display = 'block';
     document.getElementById('backBtn').style.display = 'none';
-    this.districtWise();
+    
+    let params = JSON.parse(sessionStorage.getItem('report-level-info'));
+
+    if (params && params.level) {
+      let data = params.data;
+      if (params.level === 'district') {
+        this.districtHierarchy = {
+          distId: data.id
+        };
+
+        this.districtId = data.id;
+        this.getDistricts();
+        this.onDistrictSelect(data.id);
+      } else if (params.level === 'block') {
+        this.districtHierarchy = {
+          distId: data.districtId
+        };
+
+        this.blockHierarchy = {
+          distId: data.districtId,
+          blockId: data.id
+        };
+
+        this.districtId = data.districtId;
+        this.blockId = data.id;
+        this.getDistricts();
+        this.getBlocks(data.districtId, data.id);
+      } else if (params.level === 'cluster') {
+        this.districtHierarchy = {
+          distId: data.districtId
+        };
+
+        this.blockHierarchy = {
+          distId: data.districtId,
+          blockId: data.blockId
+        };
+
+        this.clusterHierarchy = {
+          distId: data.districtId,
+          blockId: data.blockId,
+          clusterId: data.id
+        };
+
+        this.districtId = data.blockHierarchy;
+        this.blockId = data.blockId;
+        this.clusterId = data.id;
+        this.getDistricts();
+        this.getBlocks(data.districtId);
+        this.getClusters(data.districtId, data.blockId, data.id);
+      }
+    } else {
+      this.districtWise();
+    }
   }
+
+  getDistricts(): void {
+    this.service.infraMapDistWise().subscribe(res => {
+      this.data = res['data'];
+      this.districtMarkers = this.data;
+    });
+  }
+
+  getBlocks(distId, blockId?: any): void {
+    this.service.infraMapBlockWise(distId).subscribe(res => {
+      this.data = res['data'];
+      this.blockMarkers = this.data;
+      if (blockId)
+        this.onBlockSelect(blockId);
+    });
+  }
+
+  getClusters(distId, blockId, clusterId): void {
+    this.service.infraMapClusterWise(distId, blockId).subscribe(res => {
+      this.data = res['data'];
+      this.clusterMarkers = this.data;
+      this.onClusterSelect(clusterId);
+    });
+  }
+
+
   // to load all the districts for state data on the map
   districtWise() {
     try {
@@ -394,12 +474,13 @@ export class InfraMapVisualisationComponent implements OnInit {
           if (this.schoolMarkers.length !== 0) {
             for (let i = 0; i < this.schoolMarkers.length; i++) {
               var color = this.commonService.colorGredient(this.schoolMarkers[i], this.infraData);
-              var markerIcon = this.commonService.initMarkers(this.schoolMarkers[i].details.latitude, this.schoolMarkers[i].details.longitude, color, 0.9, 1, 0.4, options.level);
+              var markerIcon = this.commonService.initMarkers(this.schoolMarkers[i].details.latitude, this.schoolMarkers[i].details.longitude, color, 0, 0, 0.3, options.level);
 
               this.generateToolTip(this.schoolMarkers[i], options.level, markerIcon, "latitude", "longitude");
               this.getDownloadableData(this.schoolMarkers[i], options.level);
             }
-            this.commonService.restrictZoom(globalMap);
+            globalMap.doubleClickZoom.enable();
+            globalMap.scrollWheelZoom.enable();
             globalMap.setMaxBounds([[options.centerLat - 4.5, options.centerLng - 6], [options.centerLat + 3.5, options.centerLng + 6]]);
             globalMap.setView(new L.LatLng(options.centerLat, options.centerLng), this.commonService.zoomLevel);
 
@@ -502,6 +583,7 @@ export class InfraMapVisualisationComponent implements OnInit {
     if (this.myData) {
       this.myData.unsubscribe();
     }
+
     this.myData = this.service.infraMapClusterWise(this.districtHierarchy.distId, blockId).subscribe(res => {
       this.data = res['data'];
       this.gettingInfraFilters(this.data);
@@ -924,5 +1006,26 @@ export class InfraMapVisualisationComponent implements OnInit {
         this.reportData.push(myobj);
       }
     }
+  }
+
+  goToHealthCard(): void {
+    let data: any = {};
+
+    if (this.dist) {
+      data.level = 'district';
+      data.value = this.districtHierarchy.distId;
+    } else if (this.blok) {
+      data.level = 'block';
+      data.value = this.blockHierarchy.blockId;
+    } else if (this.clust) {
+      data.level = 'cluster';
+      data.value = this.clusterHierarchy.clusterId;
+    } else {
+      data.level = 'state';
+      data.value = null
+    }
+
+    sessionStorage.setItem('health-card-info', JSON.stringify(data));
+    this._router.navigate(['/healthCard']);
   }
 }

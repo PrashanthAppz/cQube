@@ -24,7 +24,7 @@ export class SemesterExceptionComponent implements OnInit {
   public dateRange: any = '';
 
   // to hide and show the hierarchy details
-  public skul: boolean = false;
+  public skul: boolean = true;
   public dist: boolean = false;
   public blok: boolean = false;
   public clust: boolean = false;
@@ -64,8 +64,8 @@ export class SemesterExceptionComponent implements OnInit {
   public blockId: any = '';
   public clusterId: any = '';
 
-  public semesters = [{ id: 1, name: "Semester 1" }, { id: 2, name: "Semester 2" }];
-  public semester = 2;
+  public semesters = [];
+  public semester;
   public levelWise = '';
 
   public myData;
@@ -92,8 +92,14 @@ export class SemesterExceptionComponent implements OnInit {
     globalMap.setMaxBounds([[this.lat - 4.5, this.lng - 6], [this.lat + 3.5, this.lng + 6]]);
     document.getElementById('homeBtn').style.display = 'block';
     document.getElementById('backBtn').style.display = 'none';
-    this.districtWise();
-
+    this.service.semExceptionMetaData().subscribe(res => {
+      this.semesters = res['data'];
+      this.semester = this.semesters[this.semesters.length - 1].id;
+      this.districtWise();
+    }, err => {
+      this.semesters = [];
+      this.commonService.loaderAndErr(this.semesters);
+    })
   }
 
   semSelect() {
@@ -382,7 +388,7 @@ export class SemesterExceptionComponent implements OnInit {
           this.schoolMarkers = result;
           if (this.schoolMarkers.length !== 0) {
             for (let i = 0; i < this.schoolMarkers.length; i++) {
-              var markerIcon = this.commonService.initMarkers(this.schoolMarkers[i].school_latitude, this.schoolMarkers[i].school_longitude, this.colors[i], 0.9, 1, 0.4, options.level);
+              var markerIcon = this.commonService.initMarkers(this.schoolMarkers[i].school_latitude, this.schoolMarkers[i].school_longitude, this.colors[i], 0, 0, 0.3, options.level);
 
               this.generateToolTip(this.schoolMarkers[i], options.level, markerIcon, "school_latitude", "school_longitude");
 
@@ -390,7 +396,8 @@ export class SemesterExceptionComponent implements OnInit {
               this.fileName = "School_wise_report";
             }
 
-            this.commonService.restrictZoom(globalMap);
+            globalMap.doubleClickZoom.enable();
+            globalMap.scrollWheelZoom.enable();
             globalMap.setMaxBounds([[options.centerLat - 4.5, options.centerLng - 6], [options.centerLat + 3.5, options.centerLng + 6]]);
             globalMap.setView(new L.LatLng(options.centerLat, options.centerLng), this.commonService.zoomLevel);
 
@@ -792,64 +799,64 @@ export class SemesterExceptionComponent implements OnInit {
   public color() {
     // Converts a #ffffff hex string into an [r,g,b] array
     function hex2rgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? [
-            parseInt(result[1], 16),
-            parseInt(result[2], 16),
-            parseInt(result[3], 16)
-        ] : null;
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+      ] : null;
     }
 
     // Inverse of the above
     function rgb2hex(rgb) {
-        return '#' + ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).slice(1);
+      return '#' + ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).slice(1);
     }
 
     // Interpolates two [r,g,b] colors and returns an [r,g,b] of the result
 
     function _interpolateRgb(color1, color2, factor) {
-        if (arguments.length < 3) { factor = 0.5; }
+      if (arguments.length < 3) { factor = 0.5; }
 
-        let result = color1.slice();
+      let result = color1.slice();
 
-        for (let i = 0; i < 3; i++) {
-            result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
-        }
-        return result;
+      for (let i = 0; i < 3; i++) {
+        result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+      }
+      return result;
     }
 
     function generateGradient(color1, color2, total, interpolation) {
-        const colorStart = typeof color1 === 'string' ? hex2rgb(color1) : color1;
-        const colorEnd = typeof color2 === 'string' ? hex2rgb(color2) : color2;
+      const colorStart = typeof color1 === 'string' ? hex2rgb(color1) : color1;
+      const colorEnd = typeof color2 === 'string' ? hex2rgb(color2) : color2;
 
-        // will the gradient be via RGB or HSL
-        switch (interpolation) {
-            case 'rgb':
-                return colorsToGradientRgb(colorStart, colorEnd, total);
-            case 'hsl':
-            //   return colorsToGradientHsl(colorStart, colorEnd, total);
-            default:
-                return false;
-        }
+      // will the gradient be via RGB or HSL
+      switch (interpolation) {
+        case 'rgb':
+          return colorsToGradientRgb(colorStart, colorEnd, total);
+        case 'hsl':
+        //   return colorsToGradientHsl(colorStart, colorEnd, total);
+        default:
+          return false;
+      }
     }
 
     function colorsToGradientRgb(startColor, endColor, steps) {
-        // returns array of hex values for color, since rgb would be an array of arrays and not strings, easier to handle hex strings
-        let arrReturnColors = [];
-        let interimColorRGB;
-        let interimColorHex;
-        const totalColors = steps;
-        const factorStep = 1 / (totalColors - 1);
+      // returns array of hex values for color, since rgb would be an array of arrays and not strings, easier to handle hex strings
+      let arrReturnColors = [];
+      let interimColorRGB;
+      let interimColorHex;
+      const totalColors = steps;
+      const factorStep = 1 / (totalColors - 1);
 
-        for (let idx = 0; idx < totalColors; idx++) {
-            interimColorRGB = _interpolateRgb(startColor, endColor, factorStep * idx);
-            interimColorHex = rgb2hex(interimColorRGB);
-            arrReturnColors.push(interimColorHex);
-        }
-        return arrReturnColors;
+      for (let idx = 0; idx < totalColors; idx++) {
+        interimColorRGB = _interpolateRgb(startColor, endColor, factorStep * idx);
+        interimColorHex = rgb2hex(interimColorRGB);
+        arrReturnColors.push(interimColorHex);
+      }
+      return arrReturnColors;
     }
     return {
-        generateGradient
+      generateGradient
     };
-}
+  }
 }

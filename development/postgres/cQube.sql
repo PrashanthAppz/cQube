@@ -1120,7 +1120,6 @@ create index if not exists student_attendance_trans_id on student_attendance_tra
 
 create table if not exists teacher_attendance_trans
 (
-attendance_id  bigint primary key not null,
 teacher_id  bigint,
 school_id  bigint,
 year  int,
@@ -1157,12 +1156,179 @@ day_29  smallint,
 day_30  smallint,
 day_31  smallint,
 created_on  TIMESTAMP without time zone ,
-updated_on  TIMESTAMP without time zone
--- ,foreign key (school_id) references school_hierarchy_details(school_id),
--- foreign key (teacher_id) references teacher_hierarchy_details(teacher_id)
+updated_on  TIMESTAMP without time zone,
+primary key(school_id,month,teacher_id,year)
 );
 
-create index if not exists teacher_attendance_trans_id on teacher_attendance_trans(school_id,month,teacher_id);
+create table if not exists teacher_attendance_temp
+(
+ff_uuid text,
+teacher_id  bigint,
+school_id  bigint,
+year  int,
+month  int,
+day_1  smallint,
+day_2  smallint,
+day_3  smallint,
+day_4  smallint,
+day_5  smallint,
+day_6  smallint,
+day_7  smallint,
+day_8  smallint,
+day_9  smallint,
+day_10  smallint,
+day_11  smallint,
+day_12  smallint,
+day_13  smallint,
+day_14  smallint,
+day_15  smallint,
+day_16  smallint,
+day_17  smallint,
+day_18  smallint,
+day_19  smallint,
+day_20  smallint,
+day_21  smallint,
+day_22  smallint,
+day_23  smallint,
+day_24  smallint,
+day_25  smallint,
+day_26  smallint,
+day_27  smallint,
+day_28  smallint,
+day_29  smallint,
+day_30  smallint,
+day_31  smallint,
+created_on timestamp without time zone,
+updated_on timestamp without time zone
+);
+
+create table if not exists teacher_attendance_dup
+(
+ff_uuid text,
+teacher_id  bigint,
+school_id  bigint,
+year  int,
+month  int,
+day_1  smallint,
+day_2  smallint,
+day_3  smallint,
+day_4  smallint,
+day_5  smallint,
+day_6  smallint,
+day_7  smallint,
+day_8  smallint,
+day_9  smallint,
+day_10  smallint,
+day_11  smallint,
+day_12  smallint,
+day_13  smallint,
+day_14  smallint,
+day_15  smallint,
+day_16  smallint,
+day_17  smallint,
+day_18  smallint,
+day_19  smallint,
+day_20  smallint,
+day_21  smallint,
+day_22  smallint,
+day_23  smallint,
+day_24  smallint,
+day_25  smallint,
+day_26  smallint,
+day_27  smallint,
+day_28  smallint,
+day_29  smallint,
+day_30  smallint,
+day_31  smallint,
+created_on timestamp without time zone,
+updated_on timestamp without time zone
+);
+
+
+create table if not exists teacher_attendance_staging_1
+(
+ff_uuid text,
+teacher_id  bigint,
+school_id  bigint,
+year  int,
+month  int,
+day_1  smallint,
+day_2  smallint,
+day_3  smallint,
+day_4  smallint,
+day_5  smallint,
+day_6  smallint,
+day_7  smallint,
+day_8  smallint,
+day_9  smallint,
+day_10  smallint,
+day_11  smallint,
+day_12  smallint,
+day_13  smallint,
+day_14  smallint,
+day_15  smallint,
+day_16  smallint,
+day_17  smallint,
+day_18  smallint,
+day_19  smallint,
+day_20  smallint,
+day_21  smallint,
+day_22  smallint,
+day_23  smallint,
+day_24  smallint,
+day_25  smallint,
+day_26  smallint,
+day_27  smallint,
+day_28  smallint,
+day_29  smallint,
+day_30  smallint,
+day_31  smallint,
+created_on timestamp without time zone,
+updated_on timestamp without time zone
+);
+
+create table if not exists teacher_attendance_staging_2
+(
+ff_uuid text,
+teacher_id  bigint,
+school_id  bigint,
+year  int,
+month  int,
+day_1  smallint,
+day_2  smallint,
+day_3  smallint,
+day_4  smallint,
+day_5  smallint,
+day_6  smallint,
+day_7  smallint,
+day_8  smallint,
+day_9  smallint,
+day_10  smallint,
+day_11  smallint,
+day_12  smallint,
+day_13  smallint,
+day_14  smallint,
+day_15  smallint,
+day_16  smallint,
+day_17  smallint,
+day_18  smallint,
+day_19  smallint,
+day_20  smallint,
+day_21  smallint,
+day_22  smallint,
+day_23  smallint,
+day_24  smallint,
+day_25  smallint,
+day_26  smallint,
+day_27  smallint,
+day_28  smallint,
+day_29  smallint,
+day_30  smallint,
+day_31  smallint,
+created_on timestamp without time zone,
+updated_on timestamp without time zone
+);
+
 
 /* crc_inspection_trans */
 
@@ -1672,6 +1838,49 @@ ff_uuid varchar(255),
 created_on_file_process timestamp default current_timestamp
 );
 
+create table if not exists teacher_attendance_dup
+(
+teacher_id  bigint,
+school_id  bigint,
+year  int,
+month  int,
+day_1  smallint,
+day_2  smallint,
+day_3  smallint,
+day_4  smallint,
+day_5  smallint,
+day_6  smallint,
+day_7  smallint,
+day_8  smallint,
+day_9  smallint,
+day_10  smallint,
+day_11  smallint,
+day_12  smallint,
+day_13  smallint,
+day_14  smallint,
+day_15  smallint,
+day_16  smallint,
+day_17  smallint,
+day_18  smallint,
+day_19  smallint,
+day_20  smallint,
+day_21  smallint,
+day_22  smallint,
+day_23  smallint,
+day_24  smallint,
+day_25  smallint,
+day_26  smallint,
+day_27  smallint,
+day_28  smallint,
+day_29  smallint,
+day_30  smallint,
+day_31  smallint,
+num_of_times int,
+ff_uuid varchar(255),
+created_on_file_process timestamp default current_timestamp
+);
+
+
 create table if not exists student_semester_dup
 (
 student_uid bigint,
@@ -1817,7 +2026,7 @@ create table IF NOT EXISTS diksha_content_staging(
   content_medium text,
   content_gradelevel text,
   content_subject text,
-  content_created_for double precision,
+  content_created_for text,
   object_id text,
   object_rollup_l1 text,
   derived_loc_state text,
@@ -1830,12 +2039,15 @@ create table IF NOT EXISTS diksha_content_staging(
   collection_medium text,
   collection_gradelevel text,
   collection_subject text,
-  collection_created_for double precision,
+  collection_created_for text,
   total_count int,
   total_time_spent double precision,
   created_on TIMESTAMP without time zone,
   updated_on TIMESTAMP without time zone 
   );
+
+alter table diksha_content_staging alter COLUMN content_created_for type text;
+alter table diksha_content_staging alter COLUMN collection_created_for type text;
 
 create table IF NOT EXISTS diksha_content_temp(
   ff_uuid text,
@@ -1848,7 +2060,7 @@ create table IF NOT EXISTS diksha_content_temp(
   content_medium text,
   content_gradelevel text,
   content_subject text,
-  content_created_for double precision,
+  content_created_for text,
   object_id text,
   object_rollup_l1 text,
   derived_loc_state text,
@@ -1861,13 +2073,15 @@ create table IF NOT EXISTS diksha_content_temp(
   collection_medium text,
   collection_gradelevel text,
   collection_subject text,
-  collection_created_for double precision,
+  collection_created_for text,
   total_count int,
   total_time_spent double precision,
   created_on TIMESTAMP without time zone,
   updated_on TIMESTAMP without time zone 
   );
 
+alter table diksha_content_temp alter COLUMN content_created_for type text;
+alter table diksha_content_temp alter COLUMN collection_created_for type text;
 
 /* Transanction table */
 /* diksha_content_trans*/
@@ -1883,7 +2097,7 @@ create table IF NOT EXISTS diksha_content_temp(
   content_medium text,
   content_gradelevel text,
   content_subject text,
-  content_created_for double precision,
+  content_created_for text,
   object_id text,
   object_rollup_l1 text,
   derived_loc_state text,
@@ -1896,12 +2110,17 @@ create table IF NOT EXISTS diksha_content_temp(
   collection_medium text,
   collection_gradelevel text,
   collection_subject text,
-  collection_created_for double precision,
+  collection_created_for text,
   total_count int,
   total_time_spent double precision,
   created_on TIMESTAMP without time zone,
   updated_on TIMESTAMP without time zone 
   );
+
+drop view if exists insert_diksha_trans_view;
+
+alter table diksha_content_trans alter COLUMN content_created_for type text;
+alter table diksha_content_trans alter COLUMN collection_created_for type text;
 
 /* Aggregation table*/
 /* diksha_total_content*/
@@ -1921,7 +2140,7 @@ create table IF NOT EXISTS diksha_content_temp(
   content_medium text,
   content_gradelevel text,
   content_subject text,
-  content_created_for double precision,
+  content_created_for text,
   object_id text,
   object_rollup_l1 text,
   derived_loc_state text,
@@ -1934,12 +2153,16 @@ create table IF NOT EXISTS diksha_content_temp(
   collection_medium text,
   collection_gradelevel text,
   collection_subject text,
-  collection_created_for double precision,
+  collection_created_for text,
   total_count int,
   total_time_spent double precision,
   created_on TIMESTAMP without time zone,
   updated_on TIMESTAMP without time zone 
   );
+
+alter table diksha_total_content alter COLUMN content_created_for type text;
+alter table diksha_total_content alter COLUMN collection_created_for type text;
+
 
 /* null check*/
 /* diksha_null_col*/
@@ -1984,7 +2207,7 @@ create table IF NOT EXISTS diksha_content_temp(
   content_medium text,
   content_gradelevel text,
   content_subject text,
-  content_created_for double precision,
+  content_created_for text,
   object_id text,
   object_rollup_l1 text,
   derived_loc_state text,
@@ -1997,13 +2220,17 @@ create table IF NOT EXISTS diksha_content_temp(
   collection_medium text,
   collection_gradelevel text,
   collection_subject text,
-  collection_created_for double precision,
+  collection_created_for text,
   total_count int,
   total_time_spent double precision,
   num_of_times int,
   ff_uuid varchar(255),
   created_on_file_process  TIMESTAMP without time zone default current_timestamp
   ); 
+  
+alter table diksha_dup alter COLUMN content_created_for type text;
+alter table diksha_dup alter COLUMN collection_created_for type text;
+
 
 /*Telemetry*/
 
@@ -4582,5 +4809,35 @@ ALTER TABLE school_category_master ALTER COLUMN updated_on DROP NOT NULL;
 ALTER TABLE school_medium_master ALTER COLUMN created_on DROP NOT NULL;
 ALTER TABLE school_medium_master ALTER COLUMN updated_on DROP NOT NULL;
 
+ALTER TABLE diksha_api_meta add column IF NOT EXISTS updated_on TIMESTAMP without time zone;
+ALTER TABLE diksha_api_meta add column IF NOT EXISTS tag text;
+
+create table if not exists diksha_api_summary_roll_up (date date,file_url text,expiry_time timestamp,cqube_process_status text,created_on timestamp,updated_on timestamp, primary key(date));
+
+create table if not exists diksha_tpd_mapping_temp
+  (
+    ff_uuid text,
+    uuid text,
+    state text,
+    district_name text,
+    school_name text,
+    school_id bigint,
+    status text,
+    created_on TIMESTAMP without time zone,
+    updated_on TIMESTAMP without time zone
+    );
 
 
+
+create table if not exists diksha_tpd_mapping
+  (
+    uuid text,
+    state text,
+    district_name text,
+    school_name text,
+    school_id bigint,
+    status text,
+    created_on TIMESTAMP without time zone,
+    updated_on TIMESTAMP without time zone,
+    primary key(uuid,school_id)
+    );
