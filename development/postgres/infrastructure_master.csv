@@ -1,5 +1,4 @@
 infrastructure,infrastructure_category,score,status
-<<<<<<< HEAD
 Toilet,toilet,20,1
 Handwash,toilet,0,0
 cctv,monitoring,20,1
@@ -7,7 +6,6 @@ Solar Panel,Energy resource,0,0
 library,study,20,1
 Drinking water,water,20,1
 Tap water,water,0,0
-=======
 Toilet,toilet,10,1
 Handwash,toilet,10,1
 cctv,monitoring,0,0
@@ -15,22 +13,18 @@ Solar Panel,Energy resource,10,1
 library,study,10,1
 Drinking water,water,10,1
 Tap water,water,10,1
->>>>>>> upstream/cQube-release-new
 Electricity,Energy resource,10,1
 Playground,play ground,0,0
 Digital board,study,0,0
 News paper,study,0,0
-<<<<<<< HEAD
 hand pumps,water,0,0
 boys toilet,toilet,0,0
 girls toilet,toilet,0,0
 cwsn toilet,toilet,10,1
-=======
 hand pumps,water,10,1
 boys toilet,toilet,10,1
 girls toilet,toilet,10,1
 cwsn toilet,toilet,0,0
->>>>>>> upstream/cQube-release-new
 cwsn boys toilet,toilet,0,0
 cwsn girls toilet,toilet,0,0
 boys urinals,toilet,0,0
